@@ -1,0 +1,136 @@
+<!doctype html>
+<html class="no-js" lang="en" ng-app="ICApp">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>2014 SE-HIP-calc - The Self Employed Health Insurance Premium Deduction Iterative Calculator</title>
+    <link rel="stylesheet" href="css/foundation.css" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <script src="js/vendor/modernizr.js"></script>
+</head>
+<body ng-controller="ICController">
+
+    <nav class="top-bar" data-topbar role="navigation">
+        <ul class="title-area">
+            <li class="name">
+                <h1><a href="">SE-HIP-calc Tool</a></h1>
+            </li>
+        </ul>
+        <section class="top-bar-section">
+            <!-- Right Nav Section -->
+            <ul class="right">
+                <li class="active"><a href="#" data-reveal-id="introModal">Instructions</a></li>
+            </ul>
+        </section>
+    </nav>
+
+    <div id="introModal" class="reveal-modal banner" data-reveal aria-labelledby="modalTitle" aria-hidden="true" role="dialog">
+        <div class="small-12 small-centered columns">
+            <h3>Welcome to the totally unofficial 2014 SE-HIP-calc web tool</h3>
+            <p>This web app handles the iterative calculation required for self-employed health insurance premium deductions on federal taxes (2014).</p>
+            Instructions:
+            <ul>
+                <li>Make sure that the list of assumptions applies to you</li>
+                <li>Enter your information below and hit calculate</li>
+                <li>If you require information on how the app is making iterative calculations, check the output log (as it will walk through the iterations).</li>
+                <li>This tool doesn't store or transmit data</li>
+            </ul>
+            <p>
+                I take no responsibility whatsoever for what you put on your tax forms.
+                That being said, feel free to notify me about any bugs and I will try to fix them. Thanks!
+            </p>
+        </div>
+        <a class="close-reveal-modal" aria-label="Close">&#215;</a>
+    </div>
+
+    <div class="row">
+        <div class="small-12 medium-6 columns" >
+            <form data-abide>
+                <div class="row">
+                    <div class="small-1 columns">
+                        <a href="#" class="instructions hide-for-medium-up" data-reveal-id="introModal">Instructions</a>
+                    </div>
+                    <div class="small-11 medium-12 columns">
+                        <h4 class="text-center">This Program Assumes: </h4>
+                        <ol>
+                            <li>You are filling out form 1040</li>
+                            <li>You have a 1095-A</li>
+                            <li>Your dependants (not including your spouse) have no income</li>
+                            <li>You have had minimal essential health insurance coverage for each month of 2014</li>
+                            <li>You do not need to calculate a shared policy allocation, nor the alternative calculation for year of marriage</li>
+                            <!--<li>Something about profit for self employed income</li>-->
+                        </ol>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="small-12 columns">
+                        <h4 class="text-center">Enter Tax Information Here</h4>
+                        <label>Self Employed Health Insurance Deduction (form 1040, line 29)
+                            <input ng-model="HIPremium" class="has-tip" min="0" type="number" pattern="number" data-tooltip data-options="disable_for_touch:true" aria-haspopup="true" title="Enter your Health Insurance Premium." required placeholder=""/>
+                            <small class="error">Required and must be a number.</small>
+                        </label>
+                    </div>
+                    <div class="small-5 columns">
+                        <label>Do you live in Alaska or Hawaii?
+                            <select ng-model="selectedState" ng-options="state for state in states"></select>
+                        </label>
+                    </div>
+                    <div class="small-7 columns">
+                        <label>The number of exemptions from your form 1040 line 6D
+                            <input ng-model="familySize" class="has-tip" min="0" type="number" pattern="number" data-tooltip data-options="disable_for_touch:true" aria-haspopup="true" title="" required placeholder=""/>
+                            <small class="error">Required and must be a number.</small>
+                        </label>
+                    </div>
+                </div>
+
+                <label>Monthly Premium Amount of Second Lowest Cost Silver Plan (Form 1095a, line 33, column B)
+                    <input ng-model="SLCSP" class="has-tip" min="0" type="number" pattern="number" data-tooltip data-options="disable_for_touch:true" aria-haspopup="true" title="Enter your Second Lowest Cost Silver Plan." required placeholder=" "/>
+                    <small class="error">Required and must be a number.</small>
+                </label>
+
+                <label>Modified Adjusted Gross Income (form 1040, line 37)
+                    <input ng-model="MAGIncome" class="has-tip" min="0" type="number" pattern="number" data-tooltip data-options="disable_for_touch:true" aria-haspopup="true" title="Enter your Modified Adjusted Gross Income." required placeholder=" "/>
+                    <small class="error">Required and must be a number.</small>
+                </label>
+
+                <a href="#" class="movedown button expand radius success" ng-click="submit()">Calculate</a>
+            </form>
+        </div>
+        <div class="small-12 medium-6 columns">
+            <form>
+                <div class="row">
+                    <div class="small-12 columns">
+                        <h4 class="text-center">Calculated Results</h4>
+                        <label>Final Health Insurance Premium Deduction (form 1040, line 29)<span ng-model="FHIPDeduction"></span></label>
+                        <div class="panel finalOutput" ng-class="done">{{FHIPDeduction}}</div>
+
+                        <label>Final Adjusted Gross Income (form 1040, line 37) <span ng-model="FAGIncome"></span></label>
+                        <div class="panel finalOutput" ng-class="done">{{FAGIncome}}</div>
+
+                        <label>Final Premium Tax Credit (Use this value for form 8962, line 24)
+                            <span ng-model="FTSubsidy"></span></label>
+                        <div class="panel finalOutput" ng-class="done">{{FTSubsidy}}</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="small-12 columns">
+                        <h4 class="text-center">Output Log (details)</h4>
+                        <div class="outputLog panel text-center" ng-class="done" ng-bind-html="outputStream" ng-model="outputStream">{{outputStream}}</div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/vendor/jquery.js"></script>
+    <script src="js/foundation.min.js"></script>
+    <script src="js/foundation/foundation.equalizer.js"></script>
+    <script src="js/angular.min.js"></script>
+    <script src="js/angular-sanitize.min.js"></script>
+    <script src="js/controllers.js"></script>
+    <script>
+        $(document).foundation();
+    </script>
+</body>
+</html>
